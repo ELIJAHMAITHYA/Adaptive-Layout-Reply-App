@@ -56,10 +56,12 @@ import com.example.reply.R
 import com.example.reply.data.Email
 import com.example.reply.data.MailboxType
 import com.example.reply.data.local.LocalAccountsDataProvider
+import com.example.reply.ui.utils.ReplyContentType
 import com.example.reply.ui.utils.ReplyNavigationType
 
 @Composable
 fun ReplyHomeScreen(
+    contentType: ReplyContentType,
     navigationType: ReplyNavigationType,
     replyUiState: ReplyUiState,
     onTabPressed: (MailboxType) -> Unit,
@@ -89,7 +91,7 @@ fun ReplyHomeScreen(
             text = stringResource(id = R.string.tab_spam)
         )
     )
-    if (navigationType == ReplyNavigationType.PERMANENT_NAVIGATION_DRAWER && replyUiState.isShowingHomepage) {
+    if (navigationType == ReplyNavigationType.PERMANENT_NAVIGATION_DRAWER ) {
         val navigationDrawerContentDescription = stringResource(R.string.navigation_drawer)
         PermanentNavigationDrawer(
             drawerContent = {
@@ -114,12 +116,14 @@ fun ReplyHomeScreen(
                 onTabPressed = onTabPressed,
                 onEmailCardPressed = onEmailCardPressed,
                 navigationItemContentList = navigationItemContentList,
-                modifier = modifier
+                modifier = modifier,
+                contentType = contentType
             )
         }
     } else {
         if (replyUiState.isShowingHomepage) {
             ReplyAppContent(
+                contentType = contentType,
                 navigationType = navigationType,
                 replyUiState = replyUiState,
                 onTabPressed = onTabPressed,
@@ -139,6 +143,7 @@ fun ReplyHomeScreen(
 
 @Composable
 private fun ReplyAppContent(
+    contentType: ReplyContentType,
     navigationType: ReplyNavigationType,
     replyUiState: ReplyUiState,
     onTabPressed: ((MailboxType) -> Unit),
@@ -163,24 +168,28 @@ private fun ReplyAppContent(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.inverseOnSurface)
             ) {
-                ReplyListOnlyContent(
-                    replyUiState = replyUiState,
-                    onEmailCardPressed = onEmailCardPressed,
-                    modifier = Modifier.weight(1f)
-                        .padding(
-                            horizontal = dimensionResource(R.dimen.email_list_only_horizontal_padding)
-                        )
-                )
-                AnimatedVisibility(
-                    visible = navigationType == ReplyNavigationType.BOTTOM_NAVIGATION
-                ) {
-                    ReplyBottomNavigationBar(
-                        currentTab = replyUiState.currentMailbox,
-                        onTabPressed = onTabPressed,
-                        navigationItemContentList = navigationItemContentList,
+                if (contentType == ReplyContentType.LIST_AND_DETAIL) {
+                    ReplyListOnlyContent(
+                        replyUiState = replyUiState,
+                        onEmailCardPressed = onEmailCardPressed,
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(
+                                horizontal = dimensionResource(R.dimen.email_list_only_horizontal_padding)
+                            )
                     )
+                } else {
+                    AnimatedVisibility(
+                        visible = navigationType == ReplyNavigationType.BOTTOM_NAVIGATION
+                    ) {
+                        ReplyBottomNavigationBar(
+                            currentTab = replyUiState.currentMailbox,
+                            onTabPressed = onTabPressed,
+                            navigationItemContentList = navigationItemContentList,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
                 }
             }
         }
