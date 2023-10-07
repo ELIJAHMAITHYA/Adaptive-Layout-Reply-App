@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2023 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package com.example.reply.ui
 
 import android.widget.Toast
@@ -22,8 +8,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +38,7 @@ import com.example.reply.data.MailboxType
 
 @Composable
 fun ReplyDetailsScreen(
+    isFullScreen : Boolean = false,
     replyUiState: ReplyUiState,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -65,18 +54,22 @@ fun ReplyDetailsScreen(
                 .padding(top = dimensionResource(R.dimen.detail_card_list_padding_top))
         ) {
             item {
-                ReplyDetailsScreenTopBar(
-                    onBackPressed,
-                    replyUiState,
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = dimensionResource(R.dimen.detail_topbar_padding_bottom))
-                )
-                ReplyEmailDetailsCard(
-                    email = replyUiState.currentSelectedEmail,
-                    mailboxType = replyUiState.currentMailbox,
-                    modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.detail_card_outer_padding_horizontal))
-                )
+                if (isFullScreen) {
+                    ReplyDetailsScreenTopBar(
+                        onBackPressed,
+                        replyUiState,
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = dimensionResource(R.dimen.detail_topbar_padding_bottom))
+                    )
+                }
+                    ReplyEmailDetailsCard(
+                        isFullScreen = isFullScreen,
+                        email = replyUiState.currentSelectedEmail,
+                        mailboxType = replyUiState.currentMailbox,
+                        modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.detail_card_outer_padding_horizontal))
+                    )
+
             }
         }
     }
@@ -121,6 +114,7 @@ private fun ReplyDetailsScreenTopBar(
 @Composable
 private fun ReplyEmailDetailsCard(
     email: Email,
+    isFullScreen: Boolean= false,
     mailboxType: MailboxType,
     modifier: Modifier = Modifier,
 ) {
@@ -141,22 +135,27 @@ private fun ReplyEmailDetailsCard(
                 email,
                 Modifier.fillMaxWidth()
             )
-            Text(
-                text = stringResource(email.subject),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(
-                    top = dimensionResource(R.dimen.detail_content_padding_top),
-                    bottom = dimensionResource(R.dimen.detail_expanded_subject_body_spacing)
-                ),
-            )
-            Text(
-                text = stringResource(email.body),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            DetailsScreenButtonBar(mailboxType, displayToast)
-        }
+            if (isFullScreen) {
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.detail_content_padding_top)))
+            } else {
+                Text(
+                    text = stringResource(email.subject),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(
+                        top = dimensionResource(R.dimen.detail_content_padding_top),
+                        bottom = dimensionResource(R.dimen.detail_expanded_subject_body_spacing)
+                    ),
+                )
+            }
+                Text(
+                    text = stringResource(email.body),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                DetailsScreenButtonBar(mailboxType, displayToast)
+            }
+
     }
 }
 
